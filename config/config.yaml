@@ -1,0 +1,6 @@
+http:
+  port: 8080
+  timeout: 4s
+
+log:
+  level: 'debug'

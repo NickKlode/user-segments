@@ -1,0 +1,356 @@
+basePath: /api/v1/
+definitions:
+  v1.addUserToSegmentInput:
+    properties:
+      segments:
+        items:
+          type: string
+        type: array
+      timeout:
+        type: integer
+    required:
+    - segments
+    type: object
+  v1.dataResponse:
+    properties:
+      data: {}
+    type: object
+  v1.deleteUserFromSegmentInput:
+    properties:
+      segments:
+        items:
+          type: string
+        type: array
+    required:
+    - segments
+    type: object
+  v1.errorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  v1.getOperationHistoryInput:
+    properties:
+      month:
+        type: string
+      year:
+        type: string
+    required:
+    - month
+    - year
+    type: object
+  v1.segmentCreateInput:
+    properties:
+      name:
+        type: string
+      percent:
+        type: integer
+    required:
+    - name
+    type: object
+  v1.segmentDeleteInput:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  v1.userCreateInput:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API Service for UserSegments App
+  title: UserSegments Service
+  version: "1.0"
+paths:
+  /operations/{id}:
+    post:
+      consumes:
+      - application/json
+      description: get operaion history
+      operationId: get-operaion-history
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: get operaion history
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.getOperationHistoryInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.dataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Get Operation History
+      tags:
+      - operation
+  /segments:
+    delete:
+      consumes:
+      - application/json
+      description: delete segment
+      operationId: delete-segment
+      parameters:
+      - description: delete segment
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.segmentDeleteInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.dataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Delete Segment
+      tags:
+      - segment
+    post:
+      consumes:
+      - application/json
+      description: create segment
+      operationId: create-segment
+      parameters:
+      - description: create segment
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.segmentCreateInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.dataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Create Segment
+      tags:
+      - segment
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: create user
+      operationId: create-user
+      parameters:
+      - description: user creation
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.userCreateInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.dataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Create User
+      tags:
+      - user
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete user to segment
+      operationId: delete-user-to-segment
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: delete user to segment
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.deleteUserFromSegmentInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.dataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Delete User To Segment
+      tags:
+      - user
+    get:
+      consumes:
+      - application/json
+      description: get all user segments
+      operationId: get-all-user-segments
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.dataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Get All User Segments
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: add user to segment
+      operationId: add-user-to-segment
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: add user to segment
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.addUserToSegmentInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.dataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Add User To Segment
+      tags:
+      - user
+swagger: "2.0"
