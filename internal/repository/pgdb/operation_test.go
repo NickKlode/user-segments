@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 	"usersegments/internal/entity"
+	"usersegments/pkg/postgres"
 
 	"github.com/pashagolub/pgxmock/v2"
 	"github.com/stretchr/testify/assert"
@@ -66,7 +67,9 @@ func TestOperationRepo_GetOperationHistory(t *testing.T) {
 			tt.mockBehaviour(poolMock, tt.args)
 
 			psqlMock := &OperationRepo{
-				db: poolMock,
+				db: &postgres.Postgres{
+					Pool: poolMock,
+				},
 			}
 			got, err := psqlMock.GetOperationHistory(tt.args.ctx, tt.args.user_id, tt.args.month, tt.args.year)
 			if tt.wantErr {

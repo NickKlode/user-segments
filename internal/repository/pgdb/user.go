@@ -6,30 +6,16 @@ import (
 	"fmt"
 	"usersegments/internal/entity"
 	"usersegments/internal/repository/repoerrors"
+	"usersegments/pkg/postgres"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type PgxPoolUser interface {
-	Close()
-	Acquire(ctx context.Context) (*pgxpool.Conn, error)
-	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
-	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
-	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
-	SendBatch(ctx context.Context, b *pgx.Batch) pgx.BatchResults
-	Begin(ctx context.Context) (pgx.Tx, error)
-	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
-	CopyFrom(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error)
-	Ping(ctx context.Context) error
-}
-
 type UserRepo struct {
-	db PgxPoolUser
+	db *postgres.Postgres
 }
 
-func NewUserRepo(db PgxPoolUser) *UserRepo {
+func NewUserRepo(db *postgres.Postgres) *UserRepo {
 	return &UserRepo{db: db}
 }
 
@@ -38,7 +24,7 @@ func (u *UserRepo) CreateUser(ctx context.Context, user entity.User) (int, error
 
 	var id int
 
-	err := u.db.QueryRow(ctx, query, user.Name).Scan(&id)
+	err := u.db.Pool.QueryRow(ctx, query, user.Name).Scan(&id)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if ok := errors.As(err, &pgErr); ok {
@@ -53,7 +39,7 @@ func (u *UserRepo) CreateUser(ctx context.Context, user entity.User) (int, error
 
 func (o *UserRepo) AddUserToSegment(ctx context.Context, user_id, timeout int, segment string) error {
 
-	tx, err := o.db.Begin(ctx)
+	tx, err := o.db.Pool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("pgdb - AddUserToSegment - o.db.Begin. %v", err)
 	}
@@ -96,7 +82,7 @@ func (o *UserRepo) AddUserToSegment(ctx context.Context, user_id, timeout int, s
 }
 
 func (o *UserRepo) DeleteUserFromSegment(ctx context.Context, user_id int, segment string) error {
-	tx, err := o.db.Begin(ctx)
+	tx, err := o.db.Pool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("pgdb - DeleteUserFromSegment - o.db.Begin. %v", err)
 	}
@@ -104,7 +90,7 @@ func (o *UserRepo) DeleteUserFromSegment(ctx context.Context, user_id int, segme
 
 	query := fmt.Sprintf("DELETE FROM %s WHERE user_id=$1 AND segment_id=(SELECT id FROM %s WHERE name=$2)", usersSegmentsTable, segmentsTable)
 
-	coTag, err := o.db.Exec(ctx, query, user_id, segment)
+	coTag, err := tx.Exec(ctx, query, user_id, segment)
 	if err != nil {
 		return fmt.Errorf("pgdb - DeleteUserFromSegment - tx.Exec 1. %v", err)
 	}
@@ -113,7 +99,7 @@ func (o *UserRepo) DeleteUserFromSegment(ctx context.Context, user_id int, segme
 	}
 
 	query = fmt.Sprintf("INSERT INTO %s (user_id, segment_name, operation_type) VALUES ($1, $2, $3)", operationsTable)
-	_, err = o.db.Exec(ctx, query, user_id, segment, entity.OperationTypeDelete)
+	_, err = tx.Exec(ctx, query, user_id, segment, entity.OperationTypeDelete)
 	if err != nil {
 		return fmt.Errorf("pgdb - DeleteUserFromSegment - tx.Exec 2. %v", err)
 	}
@@ -131,7 +117,7 @@ func (s *UserRepo) GetAllUserSegments(ctx context.Context, user_id int) ([]entit
 	ON %s.id=%s.segment_id 
 	AND user_id=$1`, segmentsTable, usersSegmentsTable, segmentsTable, usersSegmentsTable)
 
-	rows, err := s.db.Query(ctx, query, user_id)
+	rows, err := s.db.Pool.Query(ctx, query, user_id)
 	if err != nil {
 		return nil, fmt.Errorf("pgdb - GetAllUserSegments - s.db.Query. %v", err)
 	}

@@ -38,11 +38,7 @@ func Run() {
 	defer db.Close()
 
 	logrus.Info("Initializing repositories...")
-	repo := repository.NewRepository(repository.Deps{
-		UserPgx:      db,
-		SegmentPgx:   db,
-		OperationPgx: db,
-	})
+	repo := repository.NewRepository(db)
 
 	logrus.Info("Initializing services...")
 	service := service.NewService(service.Deps{

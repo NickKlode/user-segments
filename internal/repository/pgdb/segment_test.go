@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 	"usersegments/internal/entity"
+	"usersegments/pkg/postgres"
 
 	"github.com/pashagolub/pgxmock/v2"
 	"github.com/stretchr/testify/assert"
@@ -47,7 +48,9 @@ func TestSegmentRepo_CreateSegment(t *testing.T) {
 			tt.mockBehaviour(poolMock, tt.args)
 
 			psqlMock := &SegmentRepo{
-				db: poolMock,
+				db: &postgres.Postgres{
+					Pool: poolMock,
+				},
 			}
 			got, err := psqlMock.CreateSegment(tt.args.ctx, tt.args.segment)
 			if tt.wantErr {
@@ -94,7 +97,9 @@ func TestSegmentRepo_DeleteSegment(t *testing.T) {
 			tt.mockBehaviour(poolMock, tt.args)
 
 			psqlMock := &SegmentRepo{
-				db: poolMock,
+				db: &postgres.Postgres{
+					Pool: poolMock,
+				},
 			}
 			err := psqlMock.DeleteSegment(tt.args.ctx, tt.args.segment)
 			if tt.wantErr {

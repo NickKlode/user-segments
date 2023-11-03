@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 	"usersegments/internal/entity"
+	"usersegments/pkg/postgres"
 
 	"github.com/pashagolub/pgxmock/v2"
 	"github.com/stretchr/testify/assert"
@@ -48,7 +49,9 @@ func TestUserRepo_CreateUser(t *testing.T) {
 			tt.mockBehaviour(poolMock, tt.args)
 
 			psqlMock := &UserRepo{
-				db: poolMock,
+				db: &postgres.Postgres{
+					Pool: poolMock,
+				},
 			}
 			got, err := psqlMock.CreateUser(tt.args.ctx, tt.args.user)
 			if tt.wantErr {
@@ -102,7 +105,9 @@ func TestUserRepo_AddUserToSegment(t *testing.T) {
 			tt.mockBehaviour(poolMock, tt.args)
 
 			psqlMock := &UserRepo{
-				db: poolMock,
+				db: &postgres.Postgres{
+					Pool: poolMock,
+				},
 			}
 			err := psqlMock.AddUserToSegment(tt.args.ctx, tt.args.user_id, tt.args.timeout, tt.args.segment_name)
 			if tt.wantErr {
@@ -154,7 +159,9 @@ func TestUserRepo_DeleteUserFromSegment(t *testing.T) {
 			tt.mockBehaviour(poolMock, tt.args)
 
 			psqlMock := &UserRepo{
-				db: poolMock,
+				db: &postgres.Postgres{
+					Pool: poolMock,
+				},
 			}
 			err := psqlMock.DeleteUserFromSegment(tt.args.ctx, tt.args.user_id, tt.args.segment_name)
 			if tt.wantErr {
@@ -214,7 +221,9 @@ func TestUserRepo_GetAllUserSegments(t *testing.T) {
 			tt.mockBehaviour(poolMock, tt.args)
 
 			psqlMock := &UserRepo{
-				db: poolMock,
+				db: &postgres.Postgres{
+					Pool: poolMock,
+				},
 			}
 			got, err := psqlMock.GetAllUserSegments(tt.args.ctx, tt.args.user_id)
 			if tt.wantErr {

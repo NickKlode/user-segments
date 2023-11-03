@@ -2,13 +2,8 @@ package repository
 
 import (
 	"usersegments/internal/repository/pgdb"
+	"usersegments/pkg/postgres"
 )
-
-type Deps struct {
-	UserPgx      pgdb.PgxPoolUser
-	SegmentPgx   pgdb.PgxPoolSegment
-	OperationPgx pgdb.PgxPoolOperation
-}
 
 type Repository struct {
 	UserRepo      *pgdb.UserRepo
@@ -16,10 +11,10 @@ type Repository struct {
 	OperationRepo *pgdb.OperationRepo
 }
 
-func NewRepository(deps Deps) *Repository {
+func NewRepository(pg *postgres.Postgres) *Repository {
 	return &Repository{
-		UserRepo:      pgdb.NewUserRepo(deps.UserPgx),
-		SegmentRepo:   pgdb.NewSegmentRepo(deps.SegmentPgx),
-		OperationRepo: pgdb.NewOperationRepo(deps.OperationPgx),
+		UserRepo:      pgdb.NewUserRepo(pg),
+		SegmentRepo:   pgdb.NewSegmentRepo(pg),
+		OperationRepo: pgdb.NewOperationRepo(pg),
 	}
 }

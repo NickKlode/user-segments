@@ -6,30 +6,16 @@ import (
 	"fmt"
 	"usersegments/internal/entity"
 	"usersegments/internal/repository/repoerrors"
+	"usersegments/pkg/postgres"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type PgxPoolSegment interface {
-	Close()
-	Acquire(ctx context.Context) (*pgxpool.Conn, error)
-	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
-	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
-	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
-	SendBatch(ctx context.Context, b *pgx.Batch) pgx.BatchResults
-	Begin(ctx context.Context) (pgx.Tx, error)
-	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
-	CopyFrom(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error)
-	Ping(ctx context.Context) error
-}
-
 type SegmentRepo struct {
-	db PgxPoolSegment
+	db *postgres.Postgres
 }
 
-func NewSegmentRepo(db PgxPoolSegment) *SegmentRepo {
+func NewSegmentRepo(db *postgres.Postgres) *SegmentRepo {
 	return &SegmentRepo{db: db}
 }
 
@@ -38,7 +24,7 @@ func (s *SegmentRepo) CreateSegment(ctx context.Context, segment entity.Segment)
 
 	var id int
 
-	err := s.db.QueryRow(ctx, query, segment.Name, segment.Percent).Scan(&id)
+	err := s.db.Pool.QueryRow(ctx, query, segment.Name, segment.Percent).Scan(&id)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if ok := errors.As(err, &pgErr); ok {
@@ -54,7 +40,7 @@ func (s *SegmentRepo) CreateSegment(ctx context.Context, segment entity.Segment)
 func (s *SegmentRepo) DeleteSegment(ctx context.Context, name string) error {
 	query := fmt.Sprintf("DELETE FROM %s WHERE name=$1", segmentsTable)
 
-	coTag, err := s.db.Exec(ctx, query, name)
+	coTag, err := s.db.Pool.Exec(ctx, query, name)
 	if err != nil {
 		return fmt.Errorf("pgdb - DeleteSegment - s.db.Exec. %v", err)
 	}
