@@ -3,20 +3,20 @@ package httpserver
 import (
 	"context"
 	"net/http"
-	"usersegments/config"
+	"time"
 )
 
 type Server struct {
 	httpServer *http.Server
 }
 
-func New(cfg *config.Config, handler http.Handler) *Server {
+func New(handler http.Handler, port string, timeout time.Duration) *Server {
 	return &Server{
 		httpServer: &http.Server{
-			Addr:         ":" + cfg.Port,
+			Addr:         ":" + port,
 			Handler:      handler,
-			ReadTimeout:  cfg.HTTP.Timeout,
-			WriteTimeout: cfg.HTTP.Timeout,
+			ReadTimeout:  timeout,
+			WriteTimeout: timeout,
 		},
 	}
 }

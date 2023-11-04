@@ -54,7 +54,7 @@ func Run() {
 		SegmentService:   service.SegmentService,
 	})
 
-	srv := httpserver.New(cfg, handler.InitRoutes())
+	srv := httpserver.New(handler.InitRoutes(), cfg.HTTP.Port, cfg.HTTP.Timeout)
 
 	go func() {
 		if err := srv.Run(); !errors.Is(err, http.ErrServerClosed) {
